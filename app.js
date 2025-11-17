@@ -16,16 +16,20 @@ class BackendService {
             method: 'GET',
             mode: 'cors',
             redirect: 'follow',
-            headers: new Headers({
-                'Content-Type': 'text/plain;charset=utf-8'
-            })
+            headers: {
+                'Content-Type': 'application/json'
+            }
         };
 
         // Check if data payload exists
         if (params.data) {
             // Use POST for sending data
             options.method = 'POST';
-            options.body = JSON.stringify(params); // Send all params in the body
+            options.body = JSON.stringify({
+                action: params.action,
+                data: params.data,
+                ...params
+            });
         } else {
             // Use GET for fetching data
             const queryString = Object.keys(params)
@@ -41,44 +45,18 @@ class BackendService {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            // Handle AppScript's 302 redirect for JSON
-            if (response.type === 'opaque' || response.redirected) {
-                console.warn("AppScript POST redirect. Using fallback data.");
-                return this.getFallbackData(params.action, params);
-            }
-
             const result = await response.json();
             return result;
         } catch (error) {
             console.error('Backend request failed:', error);
-            return this.getFallbackData(params.action, params);
+            return { 
+                success: false, 
+                error: 'Connection failed. Please check your backend URL.' 
+            };
         }
     }
 
-    getFallbackData(action, params) {
-        // Only provide fallback for critical functions
-        switch(action) {
-            case 'login':
-                if (params.username === 'demo' && params.password === 'demo123') {
-                    return {
-                        success: true,
-                        userData: {
-                            userID: 'USR001',
-                            username: 'demo',
-                            fullName: 'Demo User',
-                            email: 'demo@example.com',
-                            mobile: '9876543210',
-                            city: 'Delhi',
-                            state: 'Delhi'
-                        }
-                    };
-                }
-                return { success: false, error: 'Invalid credentials' };
-            default:
-                return { success: false, error: 'Backend connection failed' };
-        }
-    }
-
+    // User Management
     async register(userData) {
         return await this.makeRequest({
             action: 'register',
@@ -94,6 +72,7 @@ class BackendService {
         });
     }
 
+    // Complaint Management
     async submitComplaint(complaintData) {
         return await this.makeRequest({
             action: 'submitComplaint',
@@ -108,15 +87,55 @@ class BackendService {
         });
     }
 
-    async getComplaintStats() {
+    async getComplaintDetails(complaintID) {
         return await this.makeRequest({
-            action: 'getComplaintStats'
+            action: 'getComplaintDetails',
+            complaintID: complaintID
         });
     }
 
-    async getNotifications(userID) {
+    async getComplaintTracking(complaintID) {
         return await this.makeRequest({
-            action: 'getNotifications',
+            action: 'getComplaintTracking',
+            complaintID: complaintID
+        });
+    }
+
+    async uploadComplaintPhoto(complaintID, photoData) {
+        return await this.makeRequest({
+            action: 'uploadPhoto',
+            complaintID: complaintID,
+            photoData: photoData
+        });
+    }
+
+    // AQI & Map Data
+    async getAQIData() {
+        return await this.makeRequest({
+            action: 'getAQIData'
+        });
+    }
+
+    async getAQIStations() {
+        return await this.makeRequest({
+            action: 'getAQIStations'
+        });
+    }
+
+    // Hospital Services
+    async getNearbyHospitals(lat, lng, radius = 10) {
+        return await this.makeRequest({
+            action: 'getHospitals',
+            lat: lat,
+            lng: lng,
+            radius: radius
+        });
+    }
+
+    // Profile Management
+    async getUserProfile(userID) {
+        return await this.makeRequest({
+            action: 'getUserProfile',
             userID: userID
         });
     }
@@ -125,7 +144,50 @@ class BackendService {
         return await this.makeRequest({
             action: 'updateUserProfile',
             userID: userID,
-            profileData: JSON.stringify(profileData)
+            data: JSON.stringify(profileData)
+        });
+    }
+
+    async getHealthProfile(userID) {
+        return await this.makeRequest({
+            action: 'getHealthProfile',
+            userID: userID
+        });
+    }
+
+    async updateHealthProfile(userID, healthData) {
+        return await this.makeRequest({
+            action: 'updateHealthProfile',
+            userID: userID,
+            data: JSON.stringify(healthData)
+        });
+    }
+
+    // Notifications
+    async getNotifications(userID) {
+        return await this.makeRequest({
+            action: 'getNotifications',
+            userID: userID
+        });
+    }
+
+    // Analytics
+    async getComplaintStats(userID) {
+        return await this.makeRequest({
+            action: 'getComplaintStats',
+            userID: userID
+        });
+    }
+
+    async getSystemAnalytics() {
+        return await this.makeRequest({
+            action: 'getSystemAnalytics'
+        });
+    }
+
+    async getComplaintAnalytics() {
+        return await this.makeRequest({
+            action: 'getComplaintAnalytics'
         });
     }
 }
