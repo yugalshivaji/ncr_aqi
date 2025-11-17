@@ -1,5 +1,5 @@
 // Backend Service Integration
-const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbyoNzGHea-kGugUulTvsXMsjbAVs-2_4OPGvLiOaiJe8o7-3PBbt5_pyBE3aMM74ykG/exec';
+const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbzNrD2wZ5UG6wv12pX1Ugs6JghqR3jMmFcnlY0L00XosSW3ePY764l7tXJFVFOvX32N-Q/exec';
 
 // Direct API Integrations
 const AQI_API_KEY = '8fd33513cb7c5bd7a8b957ffa407c0d1805abf08'; // Use 'demo' for testing or get real key from aqicn.org
